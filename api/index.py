@@ -21,7 +21,7 @@ def overview(ticker: str):
     except requests.RequestException as e:
         return jsonify({"error": "upstream unreachable", "detail": str(e)}), 502
 
-    soup = BeautifulSoup(r.text, "html.parser")
+    soup = BeautifulSoup(r.text, "html.parser")   # NOT "lxml"
     card = soup.find("h2", string=re.compile("Company Overview"))
     if not card:
         return jsonify({"error": "overview not found"}), 404
