@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-import requests, json, os, re
+import requests, json, os, re, lxml
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
