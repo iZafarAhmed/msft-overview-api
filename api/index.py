@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-import requests, json, os, re, lxml
+import requests, json, os, re
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
@@ -21,7 +21,7 @@ def overview(ticker: str):
     except requests.RequestException as e:
         return jsonify({"error": "upstream unreachable", "detail": str(e)}), 502
 
-    soup = BeautifulSoup(r.text, "lxml")
+    soup = BeautifulSoup(r.text, "html.parser")
     card = soup.find("h2", string=re.compile("Company Overview"))
     if not card:
         return jsonify({"error": "overview not found"}), 404
