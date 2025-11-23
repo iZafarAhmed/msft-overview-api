@@ -1,7 +1,7 @@
-# lambda_function.py
-import json, os, re
+from flask import Flask, jsonify, request
 import requests
 from bs4 import BeautifulSoup
+import traceback
 
 TICKER_RE = re.compile(r"^[A-Z]{1,5}(-[A-Z]{2})?$")   # naive sanity check
 URL_TMPL  = "https://fiscal.ai/company/{exchange}-{ticker}/"
