@@ -9,38 +9,52 @@ URL_TMPL = "https://fiscal.ai/company/{exchange}-{ticker}/"
 
 @app.route("/<ticker>")
 def overview(ticker: str):
-    if not TICKER_RE.match(ticker.upper()):
+    t = ticker.upper()
+
+    if not TICKER_RE.match(t):
         return jsonify({"error": "invalid ticker"}), 400
 
-    url = URL_TMPL.format(exchange="NasdaqGS", ticker=ticker.upper())
+    url = URL_TMPL.format(exchange="NasdaqGS", ticker=t)
+
     try:
-        r = requests.get(url, timeout=10, headers={
-            "User-Agent": "Mozilla/5.0 (Company-Overview-Bot 1.0; +https://yourdomain.com/bot)"
-        })
+        r = requests.get(
+            url,
+            timeout=10,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Company-Overview-Bot 1.0; +https://yourdomain.com/bot)"
+            },
+        )
         r.raise_for_status()
     except requests.RequestException as e:
         return jsonify({"error": "upstream unreachable", "detail": str(e)}), 502
 
     soup = BeautifulSoup(r.text, "html.parser")
+
     card = soup.find("h2", string=re.compile("Company Overview"))
     if not card:
         return jsonify({"error": "overview not found"}), 404
+
     root = card.find_parent("div", class_="mantine-Stack-root")
+    if not root:
+        return jsonify({"error": "unexpected HTML structure"}), 500
 
     spoiler = root.find("div", class_="mantine-Spoiler-content")
     description = spoiler.get_text(" ", strip=True) if spoiler else ""
 
     kv = {}
     for li in root.select("li.mantine-List-item"):
-        key = li.select_one("p").get_text(strip=True)
-        val = li.select_all("p")[-1].get_text(strip=True)
-        kv[key] = val
+        ps = li.select("p")
+        if len(ps) >= 2:
+            key = ps[0].get_text(strip=True)
+            val = ps[-1].get_text(strip=True)
+            kv[key] = val
 
     return jsonify({
-        "ticker": ticker.upper(),
+        "ticker": t,
         "description": description,
-        "metadata": kv
+        "metadata": kv,
     })
+
 
 @app.route("/")
 def root():
