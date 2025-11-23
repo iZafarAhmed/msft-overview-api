@@ -1,8 +1,18 @@
 from flask import Flask, jsonify, request
-import requests
-import json, os, re
+import requests, json, os, re
 from bs4 import BeautifulSoup
-import traceback
+
+app = Flask(__name__) 
+
+@app.route("/<ticker>")
+def overview(ticker: str):
+    … your scraping code …
+    return jsonify(…)
+
+# optional health-check
+@app.route("/")
+def root():
+    return jsonify({"message": "MSFT overview service"})
 
 TICKER_RE = re.compile(r"^[A-Z]{1,5}(-[A-Z]{2})?$")   # naive sanity check
 URL_TMPL  = "https://fiscal.ai/company/{exchange}-{ticker}/"
